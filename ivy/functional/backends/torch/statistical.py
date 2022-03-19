@@ -55,6 +55,20 @@ def prod(x: torch.Tensor,
     return torch.prod(input=x, dim=axis, dtype=dtype, keepdim=keepdims)
 
 
+def mean(x, axis: Optional[List[int]] = None, keepdims: bool = False):
+    if axis is None:
+        num_dims = len(x.shape)
+        axis = list(range(num_dims))
+    return torch.mean(x, dim=axis, keepdim=keepdims)
+
+
+def var(x, axis: Optional[List[int]] = None, keepdims: bool = False):
+    if axis is None:
+        num_dims = len(x.shape)
+        axis = list(range(num_dims))
+    return torch.var(x, dim=axis, unbiased=False, keepdim=keepdims)
+
+
 # noinspection PyShadowingBuiltins
 def max(x: torch.Tensor,
         axis: Union[int, Tuple[int]] = None,

@@ -25,11 +25,25 @@ def sum(x: jnp.ndarray,
     return jnp.sum(x, axis=axis, keepdims=keepdims)
 
 
-def prod(x: jnp.ndarray,
-         axis: Optional[Union[int, Tuple[int]]] = None,
-         dtype: Optional[jnp.dtype] = None,
-         keepdims: bool = False)\
-        -> jnp.ndarray:
+def mean(x, axis=None, keepdims=False):
+    if axis is None:
+        num_dims = len(x.shape)
+        axis = tuple(range(num_dims))
+    elif isinstance(axis, list):
+        axis = tuple(axis)
+    return jnp.mean(x, axis=axis, keepdims=keepdims)
+
+
+def var(x, axis=None, keepdims=False):
+    if axis is None:
+        num_dims = len(x.shape)
+        axis = tuple(range(num_dims))
+    elif isinstance(axis, list):
+        axis = tuple(axis)
+    return jnp.var(x, axis=axis, keepdims=keepdims)
+
+
+def prod(x, axis=None,dtype= None, keepdims=False):
 
     if dtype == None and jnp.issubdtype(x.dtype,jnp.integer):
         if jnp.issubdtype(x.dtype,jnp.signedinteger) and x.dtype in [jnp.int8,jnp.int16,jnp.int32]:
@@ -42,7 +56,14 @@ def prod(x: jnp.ndarray,
             dtype = jnp.uint64
 
     return jnp.prod(a=x,axis=axis,dtype=dtype,keepdims=keepdims)
-
+    
+def reduce_prod(x, axis=None, keepdims=False):
+    if axis is None:
+        num_dims = len(x.shape)
+        axis = tuple(range(num_dims))
+    elif isinstance(axis, list):
+        axis = tuple(axis)
+    return _jnp.prod(x, axis=axis, keepdims=keepdims)
 
 def max(x: jnp.ndarray,
         axis: Union[int, Tuple[int]] = None,
