@@ -6,6 +6,12 @@ from typing import Union, Tuple, Optional, List
 
 
 
+def squeeze(x: np.ndarray,
+            axis: Union[int, Tuple[int], List[int]])\
+        -> np.ndarray:
+    return np.squeeze(x, axis)
+
+
 def _flat_array_to_1_dim_array(x):
     return x.reshape((1,)) if x.shape == () else x
 
@@ -36,6 +42,8 @@ def permute_dims(x: np.ndarray,
     return np.transpose(x, axes)
 
 
+stack = np.stack
+
 
 # Extra #
 # ------#
@@ -64,3 +72,4 @@ tile = np.tile
 constant_pad = lambda x, pad_width, value=0: np.pad(_flat_array_to_1_dim_array(x), pad_width, constant_values=value)
 zero_pad = lambda x, pad_width: np.pad(_flat_array_to_1_dim_array(x), pad_width)
 swapaxes = np.swapaxes
+clip = lambda x, x_min, x_max: np.asarray(np.clip(x, x_min, x_max))

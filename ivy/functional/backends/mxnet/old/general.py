@@ -87,28 +87,18 @@ def dtype_bits(dtype_in):
         'int', '').replace('bfloat', '').replace('float', ''))
 
 
-equal = lambda x1, x2: x1 == x2
-equal.__name__ = 'equal'
 
-shape = lambda x, as_tensor=False: _mx.nd.shape_array(x) if as_tensor else x.shape
-shape.__name__ = 'shape'
-get_num_dims = lambda x, as_tensor=False:\
-    _mx.nd.shape_array(_mx.nd.shape_array(x)).reshape([]) if as_tensor else len(x.shape)
+
 minimum = lambda x, y: _mx.nd.array(_mx.nd.minimum(_scalar_or_flat_array_to_scalar(x), _scalar_or_flat_array_to_scalar(y)))
 maximum = lambda x, y: _mx.nd.array(_mx.nd.maximum(_scalar_or_flat_array_to_scalar(x), _scalar_or_flat_array_to_scalar(y)))
 
 
-@_handle_flat_arrays_in_out
-def clip(x, x_min, x_max):
-    return _mx.nd.clip(_mx.nd.array(x), x_min, x_max)
 
 
 # noinspection PyShadowingBuiltins
 @_handle_flat_arrays_in_out
 def abs(x):
     return _mx.nd.abs(x)
-
-argmin = lambda x, axis=0: _mx.nd.argmin(x, axis)
 
 
 @_handle_flat_arrays_in_out
@@ -119,13 +109,7 @@ def cast(x, dtype):
 astype = cast
 
 
-# noinspection PyUnresolvedReferences
-def arange(stop, start=0, step=1, dtype=None, dev=None):
-    cont = _mxnet_init_context(default_device(dev))
-    stop = stop if isinstance(stop, Number) else stop.asscalar()
-    start = start if isinstance(start, Number) else start.asscalar()
-    step = step if isinstance(step, Number) else step.asscalar()
-    return _mx.nd.arange(start, stop, ctx=cont, step=step, dtype=dtype)
+
 
 
 
@@ -135,18 +119,7 @@ def concatenate(xs, axis=-1):
     return _mx.nd.concat(*xs, dim=axis)
 
 
-def stack(xs, axis=0):
-    if xs[0].shape == ():
-        return _mx.nd.reshape(_mx.nd.stack(*[_flat_array_to_1_dim_array(x) for x in xs], axis=axis), -1)
-    return _mx.nd.stack(*xs, axis=axis)
 
-
-def transpose(x, axes=None):
-    if axes is None:
-        num_dims = len(x.shape)
-        axes = list(range(num_dims))
-        axes.reverse()
-    return _mx.nd.transpose(x, axes)
 
 
 @_handle_flat_arrays_in_out
@@ -160,16 +133,6 @@ def where(condition, x1, x2):
     tiled_condition = _mx.nd.tile(condition, tile_reps)
     return _mx.nd.where(tiled_condition, x1, x2)
 
-
-def indices_where(x):
-    x_shape = x.shape
-    x_flat = x.reshape((1, -1,))
-    flat_indices = x_flat.astype('int32').tostype('csr').indices
-    if flat_indices.shape == (0,):
-        res = flat_indices.reshape((0, len(x_shape)))
-        return res
-    res = _mx.nd.swapaxes(_mx.nd.unravel_index(flat_indices, x_shape), 0, 1)
-    return res
 
 
 reshape = lambda x, new_shape: x.reshape(new_shape)
@@ -216,8 +179,6 @@ def full(shape, fill_value, dtype=None, device=None):
             _mx.nd.full((1,), fill_value, cont, dtype_from_str(default_dtype(dtype, fill_value))))
     return _mx.nd.full(shape, fill_value, cont, dtype_from_str(default_dtype(dtype, fill_value)))
 
-# noinspection PyUnusedLocal
-one_hot = lambda indices, depth, dev=None: _mx.nd.one_hot(indices, depth)
 
 
 def cross(x1, x2):
@@ -278,30 +239,6 @@ def meshgrid(*xs, indexing='ij'):
 
 
 
-def linear_resample(x, num_samples, axis=-1):
-    x_shape = list(x.shape)
-    num_x_dims = len(x_shape)
-    axis = axis % num_x_dims
-    x_pre_shape = x_shape[0:axis]
-    x_pre_size = _reduce(_mul, x_pre_shape) if x_pre_shape else 1
-    num_pre_dims = len(x_pre_shape)
-    num_vals = x.shape[axis]
-    x_post_shape = x_shape[axis+1:]
-    x_post_size = _reduce(_mul, x_post_shape) if x_post_shape else 1
-    num_post_dims = len(x_post_shape)
-    xp = _mx.nd.reshape(_mx.nd.arange(num_vals*x_pre_size*x_post_size), x_shape)
-    x_coords = _mx.nd.arange(num_samples) * ((num_vals-1)/(num_samples-1)) * x_post_size
-    x_coords = _mx.nd.reshape(x_coords, [1]*num_pre_dims + [num_samples] + [1]*num_post_dims)
-    x_coords = _mx.nd.broadcast_to(x_coords, x_pre_shape + [num_samples] + x_post_shape)
-    slc = [slice(None)] * num_x_dims
-    slc[axis] = slice(0, 1, 1)
-    x_coords = x_coords + xp[tuple(slc)]
-    x = _mx.nd.reshape(x, (-1,))
-    xp = _mx.nd.reshape(xp, (-1,))
-    x_coords = _mx.nd.reshape(x_coords, (-1,))
-    ret = _mx.nd.array(_mx.np.interp(x_coords.asnumpy(), xp.asnumpy(), x.asnumpy()))
-    return _mx.nd.reshape(ret, x_pre_shape + [num_samples] + x_post_shape)
-
 
 def dtype(x, as_str=False):
     dt = x.dtype
@@ -332,7 +269,7 @@ def compile(func, dynamic=True, example_inputs=None, static_argnums=None, static
 
 current_framework_str = lambda: 'mxnet'
 current_framework_str.__name__ = 'current_framework_str'
-multiprocessing = lambda context=None: _multiprocessing if context is None else _multiprocessing.get_context(context)
+
 
 
 

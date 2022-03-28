@@ -33,12 +33,10 @@ def dtype_bits(dtype_in):
         'float', ''))
 
 
-def shape(x, as_tensor=False) -> Union[torch.Tensor, List[int]]:
-    return torch.tensor(x.shape) if as_tensor else x.shape
 
 
-def get_num_dims(x, as_tensor=False) -> Union[torch.Tensor, int]:
-    return torch.tensor(len(x.shape)) if as_tensor else len(x.shape)
+
+
 
 
 def minimum(x, y):
@@ -53,16 +51,6 @@ def maximum(x, y):
     return torch.max(x_val, y_val)
 
 
-def clip(x, x_min, x_max):
-    return torch.clamp(x, x_min, x_max)
-
-
-# noinspection PyShadowingBuiltins
-# noinspection PyShadowingBuiltins
-def abs(x):
-    return torch.abs(x)
-
-
 def cast(x, dtype_in: str):
     dtype_val = dtype_from_str(dtype_in)
     return x.type(dtype_val)
@@ -71,14 +59,7 @@ def cast(x, dtype_in: str):
 astype = cast
 
 
-# noinspection PyShadowingNames
-def arange(stop: Number, start: Number = 0, step: Number = 1, dtype: Optional[str] = None,
-           dev: Optional[str] = None):
-    dev = default_device(dev)
-    if dtype is not None:
-        return torch.arange(start, stop, step=step, dtype=dtype_from_str(dtype), device=dev_from_str(dev))
-    else:
-        return torch.arange(start, stop, step=step, device=dev_from_str(dev))
+
 
 
 
@@ -90,8 +71,6 @@ def concatenate(xs: List[torch.Tensor], axis: int = -1):
     return torch.cat(xs, axis)
 
 
-def stack(xs: List[torch.Tensor], axis: int = 0):
-    return torch.stack(xs, axis)
 
 
 
@@ -101,22 +80,13 @@ def stack(xs: List[torch.Tensor], axis: int = 0):
 
 
 
-def transpose(x, axes: List[int]):
-    if axes is None:
-        num_dims = len(x.shape)
-        axes = list(range(num_dims))
-        axes.reverse()
-    return x.permute(axes)
+
 
 
 def where(condition, x1, x2):
     return torch.where(condition.type(torch.bool), x1, x2)
 
 
-def indices_where(x):
-    where_x = torch.where(x)
-    res = torch.cat([torch.unsqueeze(item, -1) for item in where_x], -1)
-    return res
 
 
 def reshape(x, newshape: List[int]):
@@ -127,13 +97,6 @@ def reshape(x, newshape: List[int]):
 
 def broadcast_to(x, new_shape):
     return x.expand(new_shape)
-
-
-def squeeze(x, axis: Optional[int] = None):
-    if axis is None:
-        return torch.squeeze(x)
-    return torch.squeeze(x, axis)
-
 
 
 
@@ -162,11 +125,7 @@ def full(shape, fill_value, dtype=None, device=None):
         device=default_device(device))
 
 
-# noinspection PyUnresolvedReferences,PyShadowingNames
-def one_hot(indices, depth: int, dev: Optional[str] = None):
-    if dev is None:
-        dev = _callable_dev(indices)
-    return torch.nn.functional.one_hot(indices.type(torch.int64), depth).to(dev_from_str(dev))
+
 
 
 def cross(x1, x2):
@@ -207,24 +166,6 @@ def meshgrid(*xs, indexing='ij'):
     return ret
 
 
-
-
-def linear_resample(x, num_samples: int, axis: int = -1):
-    x_shape = list(x.shape)
-    num_x_dims = len(x_shape)
-    num_vals = x_shape[axis]
-    axis = axis % num_x_dims
-    if axis != num_x_dims - 1:
-        x_pre_shape = x_shape[0:axis] + x_shape[-1:] + x_shape[axis + 1:-1]
-        x = torch.swapaxes(x, axis, -1)
-    else:
-        x_pre_shape = x_shape[:-1]
-    x = torch.reshape(x, ([-1, 1] + [num_vals]))
-    ret = torch.nn.functional.interpolate(x, num_samples, mode='linear', align_corners=True)
-    ret = torch.reshape(ret, x_pre_shape + [num_samples])
-    if axis != num_x_dims - 1:
-        return torch.transpose(ret, -1, axis)
-    return ret
 
 
 def dtype(x, as_str=False):
@@ -273,12 +214,6 @@ def compile(fn, dynamic=True, example_inputs=None, static_argnums=None, static_a
 def current_framework_str():
     return 'torch'
 
-
-def multiprocessing(context=None):
-    import torch.multiprocessing
-    if context is None:
-        return torch.multiprocessing
-    return torch.multiprocessing.get_context(context)
 
 
 

@@ -91,13 +91,13 @@ def asarray(object_in, dtype: Optional[str] = None, dev: Optional[str] = None, c
         # Temporary fix on type
         # Because default_type() didn't return correct type for normal python array
         if copy is True:
-            return to_dev((jnp.asarray(object_in).copy()), dev)
+            return to_dev(jnp.array(object_in,copy=True), dev)
         else:
             return to_dev(jnp.asarray(object_in), dev)
     else:
         dtype = default_dtype(dtype, object_in)
     if copy is True:
-        return to_dev((jnp.asarray(object_in, dtype=dtype).copy()), dev)
+        return to_dev(jnp.array(object_in, dtype=dtype,copy=True), dev)
     else:
         return to_dev(jnp.asarray(object_in, dtype=dtype), dev)
 
@@ -116,6 +116,12 @@ def eye(n_rows: int,
     dtype = dtype_from_str(default_dtype(dtype))
     device = default_device(device)
     return to_dev(jnp.eye(n_rows, n_cols, k, dtype), device)
+
+
+# noinspection PyShadowingNames
+def arange(stop, start=0, step=1, dtype=None, dev=None):
+    dtype = dtype_from_str(dtype)
+    return to_dev(jnp.arange(start, stop, step=step, dtype=dtype), default_device(dev))
 
 
 # Extra #

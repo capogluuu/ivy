@@ -42,7 +42,9 @@ to_scalar = lambda x: x if isinstance(x, Number) else _to_array(x).item()
 to_scalar.__name__ = 'to_scalar'
 to_list = lambda x: _to_array(x).tolist()
 to_list.__name__ = 'to_list'
-
+shape = lambda x, as_tensor=False: _jnp.asarray(_jnp.shape(x)) if as_tensor else x.shape
+shape.__name__ = 'shape'
+get_num_dims = lambda x, as_tensor=False: _jnp.asarray(len(_jnp.shape(x))) if as_tensor else len(x.shape)
 
 container_types = lambda: [FlatMapping]
 
@@ -190,6 +192,20 @@ def gather_nd(params, indices, dev=None):
     new_shape = list(indices_shape[:-1]) + list(params_shape[num_index_dims:])
     ret = _jnp.reshape(flat_gather, new_shape)
     return to_dev(ret, dev)
+
+multiprocessing = lambda context=None: _multiprocessing if context is None else _multiprocessing.get_context(context)
+
+
+# noinspection PyUnusedLocal
+def one_hot(indices, depth, dev=None):
+    # from https://stackoverflow.com/questions/38592324/one-hot-encoding-using-numpy
+    res = _jnp.eye(depth)[_jnp.array(indices).reshape(-1)]
+    return to_dev(res.reshape(list(indices.shape) + [depth]), default_device(dev))
+
+def indices_where(x):
+    where_x = _jnp.where(x)
+    ret = _jnp.concatenate([_jnp.expand_dims(item, -1) for item in where_x], -1)
+    return ret
 
 
 def inplace_decrement(x, val):
